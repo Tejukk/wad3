@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration Form</title>
+</head>
+<body>
+    <h1>User Registration Form</h1>
+    <form id="user-form">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email"><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br><br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById("user-form").addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const xhr = new XMLHttpRequest();
+            const endpoint = 'https://jsonplaceholder.typicode.com/users';
+            const data = { name, email, password };
+            const jsonData = JSON.stringify(data);
+            const requestMethod = 'POST';
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 201) {
+                        const users = JSON.parse(localStorage.getItem('users')) || [];
+                        users.push(data);
+                        localStorage.setItem('users', JSON.stringify(users));
+                        window.location.href = 'user-list.html';
+                    } else {
+                        console.error('Error:', xhr.statusText);
+                    }
+                }
+            };
+
+            xhr.open(requestMethod, endpoint, true);
+            xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            xhr.send(jsonData);
+        });
+    </script>
+
+    <h1>User List</h1>
+    <ul id="user-list"></ul>
+
+    <script>
+        const users = JSON.parse(localStorage.getItem('users'));
+        const userList = document.getElementById('user-list');
+
+        if (users && users.length) {
+            for (const user of users) {
+                const listItem = document.createElement('li');
+                listItem.textContent = user.name + '(' + user.email + ')';
+                userList.appendChild(listItem);
+            }
+        } else {
+            const listItem = document.createElement('li');
+            listItem.textContent = 'No users found.';
+            userList.appendChild(listItem);
+        }
+    </script>
+</body>
+</html>
